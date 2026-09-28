@@ -135,82 +135,8 @@ mod tests {
     use std::sync::mpsc;
     use std::thread;
 
-    use fabric_package_key_value::memory_key_value;
-
     use super::*;
     use crate::{App, Response};
-
-    fn response_body(response: &crate::Response) -> String {
-        String::from_utf8(response.body().to_vec()).expect("utf8")
-    }
-
-    #[test]
-    fn resource_handler_uses_real_fabric_key_value_without_tcp() {
-        let app = App::new()
-            .with_fabric(memory_key_value("sessions"))
-            .use_key_value("sessions")
-            .expect("key value")
-            .post("/sessions/:id", |ctx| async move {
-                let key = ctx.param("id")?.to_owned();
-                ctx.key_value()?.set(key, b"active".to_vec())?;
-                Ok(Response::text("stored"))
-            })
-            .expect("post")
-            .get("/sessions/:id", |ctx| async move {
-                let key = ctx.param("id")?.to_owned();
-                let value = ctx.key_value()?.get(key)?;
-                Ok(Response::text(
-                    value
-                        .as_deref()
-                        .map(String::from_utf8_lossy)
-                        .map(|value| value.into_owned())
-                        .unwrap_or_else(|| "missing".to_owned()),
-                ))
-            })
-            .expect("get");
-
-        let parts = app.into_parts().expect("parts");
-        let prepared = Arc::new(parts.prepared);
-        let occurrence = parts.key_value.expect("key value occurrence");
-        let composition = Fabric::new("onoal.fabric-standard.http.test.resource")
-            .expect("fabric")
-            .with(
-                parts
-                    .fabric
-                    .into_iter()
-                    .fold(FabricContribution::new(), |acc, contribution| {
-                        acc.with(contribution)
-                    }),
-            )
-            .with(key_value_runtime(occurrence, Arc::clone(&prepared)).expect("runtime"))
-            .build()
-            .expect("composition");
-        let mut instance = composition
-            .materialize_on(
-                "onoal.fabric-standard.http.test.resource.instance",
-                &HostDescriptor::native(),
-            )
-            .expect("instance");
-        instance.start().expect("start");
-        let runtime = instance
-            .component::<StandardHttpKeyValueRuntime>()
-            .expect("runtime");
-        runtime.reconcile().expect("reconcile");
-
-        let stored = futures::executor::block_on(
-            runtime.dispatch(Request::post("/sessions/abc", Vec::new())),
-        )
-        .expect("component")
-        .expect("standard");
-        assert_eq!(response_body(&stored), "stored");
-
-        let read = futures::executor::block_on(runtime.dispatch(Request::get("/sessions/abc")))
-            .expect("component")
-            .expect("standard");
-        assert_eq!(response_body(&read), "active");
-
-        instance.stop().expect("stop");
-    }
 
     #[test]
     fn plain_app_has_no_key_value_requirement() {

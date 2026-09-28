@@ -1,7 +1,8 @@
 use std::sync::{Arc, Mutex};
 
+use fabric_package_key_value::memory_key_value;
 use fabric_package_networking_http::{HttpHeader, HttpRequest, HttpVersion};
-use fabric_standard_http::{App, Error, Method, Request, Response};
+use fabric_standard_http::{App, Error, Method, Request, Response, TestRuntime};
 use futures::executor::block_on;
 
 fn text(response: &Response) -> String {
@@ -20,6 +21,122 @@ fn get_root_returns_text() {
 
     assert_eq!(response.status(), 200);
     assert_eq!(text(&response), "hello");
+}
+
+#[test]
+fn pure_prepared_app_remains_valid() {
+    let prepared = App::new()
+        .get("/", |_ctx| async { Ok(Response::text("prepared")) })
+        .expect("route")
+        .prepare()
+        .expect("prepare");
+
+    let response = block_on(prepared.request(Request::get("/"))).expect("response");
+    assert_eq!(text(&response), "prepared");
+}
+
+#[test]
+fn resource_bound_prepare_and_request_reject_explicitly() {
+    let prepare_result = App::new()
+        .with_fabric(memory_key_value("sessions"))
+        .use_key_value("sessions")
+        .expect("key value")
+        .get("/", |ctx| async move {
+            let _ = ctx.key_value()?;
+            Ok(Response::text("resource"))
+        })
+        .expect("route")
+        .prepare();
+    let Err(prepare_error) = prepare_result else {
+        panic!("resource-bound prepare was accepted");
+    };
+
+    assert!(matches!(
+        prepare_error,
+        Error::RequiresFabricBoundExecution("KeyValue")
+    ));
+    assert!(prepare_error.to_string().contains("App::test_runtime()"));
+
+    let request_error = block_on(
+        App::new()
+            .with_fabric(memory_key_value("sessions"))
+            .use_key_value("sessions")
+            .expect("key value")
+            .get("/", |ctx| async move {
+                let _ = ctx.key_value()?;
+                Ok(Response::text("resource"))
+            })
+            .expect("route")
+            .request(Request::get("/")),
+    )
+    .expect_err("resource-bound request");
+
+    assert!(matches!(
+        request_error,
+        Error::RequiresFabricBoundExecution("KeyValue")
+    ));
+}
+
+#[test]
+fn plain_test_runtime_dispatches_without_fabric_resources() {
+    let runtime: TestRuntime = App::new()
+        .get("/", |_ctx| async { Ok(Response::text("plain runtime")) })
+        .expect("route")
+        .test_runtime()
+        .expect("runtime");
+
+    let response = block_on(runtime.request(Request::get("/"))).expect("response");
+    assert_eq!(text(&response), "plain runtime");
+    runtime.stop().expect("stop");
+}
+
+#[test]
+fn key_value_test_runtime_uses_real_fabric_and_preserves_state() {
+    let app = App::new()
+        .with_fabric(memory_key_value("sessions"))
+        .use_key_value("sessions")
+        .expect("key value")
+        .middleware(|ctx, next| async move {
+            let mut response = next.run(ctx).await?;
+            response.append_header("x-runtime", "test")?;
+            Ok(response)
+        })
+        .expect("middleware")
+        .post("/sessions/:id", |ctx| async move {
+            let key = ctx.param("id")?.to_owned();
+            ctx.key_value()?.set(key, b"active".to_vec())?;
+            Ok(Response::text("stored"))
+        })
+        .expect("post")
+        .get("/sessions/:id", |ctx| async move {
+            let key = ctx.param("id")?.to_owned();
+            let value = ctx.key_value()?.get(key)?;
+            Ok(Response::text(
+                value
+                    .map(|value| String::from_utf8_lossy(&value).into_owned())
+                    .unwrap_or_else(|| "missing".to_owned()),
+            ))
+        })
+        .expect("get");
+
+    let runtime = app.test_runtime().expect("runtime");
+
+    let stored =
+        block_on(runtime.request(Request::post("/sessions/abc", Vec::new()))).expect("stored");
+    assert_eq!(text(&stored), "stored");
+    assert_eq!(
+        stored
+            .headers()
+            .iter()
+            .find(|header| header.name == "x-runtime")
+            .map(|header| header.value.as_str()),
+        Some("test")
+    );
+
+    let loaded = block_on(runtime.request(Request::get("/sessions/abc"))).expect("loaded");
+    assert_eq!(text(&loaded), "active");
+
+    runtime.stop().expect("stop");
 }
 
 #[test]

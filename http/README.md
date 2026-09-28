@@ -28,6 +28,53 @@ The same prepared application can run socket-free in tests or through a real Fab
 - local blocking `serve`;
 - one first Fabric resource proof with `KeyValue`.
 
+## Socket-Free Execution
+
+Pure HTTP applications can be prepared and dispatched without Fabric
+materialization:
+
+```rust
+use fabric_standard_http::{App, Request, Response};
+
+# async fn test() -> fabric_standard_http::Result<()> {
+let prepared = App::new()
+    .get("/", |_ctx| async { Ok(Response::text("hello")) })?
+    .prepare()?;
+
+let response = prepared.request(Request::get("/")).await?;
+# Ok(())
+# }
+```
+
+`PreparedApp` represents prepared HTTP semantics only. If a handler requires a
+Fabric-bound capability, use `TestRuntime` for socket-free tests:
+
+```rust
+use fabric_package_key_value::memory_key_value;
+use fabric_standard_http::{App, Request, Response};
+
+# async fn test() -> fabric_standard_http::Result<()> {
+let app = App::new()
+    .with_fabric(memory_key_value("sessions"))
+    .use_key_value("sessions")?
+    .post("/sessions/:id", |ctx| async move {
+        let id = ctx.param("id")?.to_owned();
+        ctx.key_value()?.set(id, b"active".to_vec())?;
+        Ok(Response::text("stored"))
+    })?;
+
+let runtime = app.test_runtime()?;
+let response = runtime
+    .request(Request::post("/sessions/abc", Vec::new()))
+    .await?;
+runtime.stop()?;
+# Ok(())
+# }
+```
+
+`TestRuntime` materializes the app's Fabric contributions and relation-bound
+capabilities without opening TCP sockets.
+
 ## Fabric Composition
 
 For resource-backed handlers, add ordinary Fabric contributions during app authoring:

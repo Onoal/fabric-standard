@@ -23,6 +23,7 @@ pub enum Error {
     Http(Box<HttpError>),
     KeyValue(Box<KeyValueError>),
     ResourceUnavailable(&'static str),
+    RequiresFabricBoundExecution(&'static str),
 }
 
 impl Error {
@@ -59,6 +60,10 @@ impl fmt::Display for Error {
             Self::Http(error) => write!(f, "HTTP package error: {error}"),
             Self::KeyValue(error) => write!(f, "KeyValue error: {error}"),
             Self::ResourceUnavailable(name) => write!(f, "resource unavailable: {name}"),
+            Self::RequiresFabricBoundExecution(name) => write!(
+                f,
+                "{name}-backed HTTP apps require Fabric-bound execution; use App::test_runtime() for socket-free tests or serve() for live HTTP transport"
+            ),
         }
     }
 }
@@ -78,7 +83,8 @@ impl StdError for Error {
             Self::Authoring(_)
             | Self::Dispatch(_)
             | Self::MiddlewareMisuse(_)
-            | Self::ResourceUnavailable(_) => None,
+            | Self::ResourceUnavailable(_)
+            | Self::RequiresFabricBoundExecution(_) => None,
         }
     }
 }

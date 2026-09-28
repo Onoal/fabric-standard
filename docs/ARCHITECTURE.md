@@ -26,3 +26,23 @@ Standard HTTP owns a small HTTP application framework:
 - a blocking local serve entrypoint backed by Fabric.
 
 It does not own backend modules, storage, authentication, OpenAPI, RPC, streaming, or a middleware catalog.
+
+The current execution boundaries are intentionally distinct:
+
+```text
+App
+    HTTP declaration plus Fabric authoring contributions
+
+PreparedApp
+    prepared pure HTTP semantics
+
+TestRuntime
+    testing-oriented Fabric-bound socket-free execution
+
+serve
+    Fabric-bound execution through real HTTP transport
+```
+
+`TestRuntime` is not a universal production runtime ontology. It exists so
+resource-backed Standard HTTP applications can be tested through real Fabric
+materialization and relation binding without TCP.

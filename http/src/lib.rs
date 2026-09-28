@@ -12,6 +12,7 @@ mod response;
 mod route;
 mod router;
 mod runtime;
+mod test_runtime;
 
 pub use app::App;
 pub use context::{Context, KeyValueHandle};
@@ -21,3 +22,4 @@ pub use prepared::PreparedApp;
 pub use request::{Header, Method, Request};
 pub use response::Response;
 pub use runtime::{serve, ServeConfig};
+pub use test_runtime::TestRuntime;

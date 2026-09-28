@@ -5,6 +5,7 @@ use crate::middleware::{middleware, Middleware};
 use crate::prepared::{default_not_found, PreparedApp};
 use crate::route::RoutePattern;
 use crate::router::{ensure_unique_route, Route, Router};
+use crate::test_runtime::TestRuntime;
 use crate::{Context, Error, Method, Response, Result};
 
 pub struct App {
@@ -175,11 +176,19 @@ impl App {
     }
 
     pub fn prepare(self) -> Result<PreparedApp> {
-        Ok(self.into_parts()?.prepared)
+        let parts = self.into_parts()?;
+        if parts.key_value.is_some() {
+            return Err(Error::RequiresFabricBoundExecution("KeyValue"));
+        }
+        Ok(parts.prepared)
     }
 
     pub async fn request(self, request: crate::Request) -> Result<Response> {
         self.prepare()?.request(request).await
+    }
+
+    pub fn test_runtime(self) -> Result<TestRuntime> {
+        TestRuntime::new(self.into_parts()?)
     }
 
     pub(crate) fn into_parts(self) -> Result<AppParts> {
