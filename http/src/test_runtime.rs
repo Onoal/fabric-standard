@@ -2,11 +2,11 @@ use std::sync::Arc;
 
 use fabric::prelude::*;
 
-use crate::app::AppParts;
 use crate::context::RuntimeResources;
 use crate::fabric_bridge::{
     key_value_runtime, StandardHttpKeyValueRuntime, StandardHttpKeyValueRuntimeInstanceApi,
 };
+use crate::runtime_support::RuntimeDefinition;
 use crate::{PreparedApp, Request, Response, Result};
 
 const COMPOSITION_ID: &str = "onoal.fabric-standard.http.test";
@@ -28,22 +28,21 @@ enum TestRuntimeMode {
 }
 
 impl TestRuntime {
-    pub(crate) fn new(parts: AppParts) -> Result<Self> {
-        if parts.fabric.is_empty() && parts.key_value.is_none() {
+    pub(crate) fn new(definition: RuntimeDefinition) -> Result<Self> {
+        let (prepared, fabric, key_value) = definition.into_parts();
+        if fabric.is_empty() && key_value.is_none() {
             return Ok(Self {
-                mode: TestRuntimeMode::Pure {
-                    app: parts.prepared,
-                },
+                mode: TestRuntimeMode::Pure { app: prepared },
             });
         }
 
-        let prepared = Arc::new(parts.prepared);
+        let prepared = Arc::new(prepared);
         let mut builder = Fabric::new(COMPOSITION_ID)?;
-        for contribution in parts.fabric {
+        for contribution in fabric {
             builder = builder.with(contribution);
         }
-        let key_value = parts.key_value.is_some();
-        if let Some(occurrence) = parts.key_value {
+        let requires_key_value = key_value.is_some();
+        if let Some(occurrence) = key_value {
             builder = builder.with(key_value_runtime(occurrence, Arc::clone(&prepared))?);
         }
 
@@ -51,7 +50,7 @@ impl TestRuntime {
         let mut instance = composition.materialize_on(INSTANCE_ID, &HostDescriptor::native())?;
         instance.start()?;
 
-        if key_value {
+        if requires_key_value {
             let runtime = instance.component::<StandardHttpKeyValueRuntime>()?;
             runtime.reconcile()?;
         }
@@ -60,7 +59,7 @@ impl TestRuntime {
             mode: TestRuntimeMode::FabricBound {
                 app: Arc::unwrap_or_clone(prepared),
                 instance: Some(Box::new(instance)),
-                key_value,
+                key_value: requires_key_value,
             },
         })
     }

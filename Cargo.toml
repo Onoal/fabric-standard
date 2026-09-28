@@ -1,5 +1,5 @@
 [workspace]
-members = ["http"]
+members = ["http", "http-runtime-native"]
 resolver = "2"
 
 [workspace.package]

@@ -13,10 +13,7 @@ path = "src/lib.rs"
 
 [dependencies]
 fabric.workspace = true
-fabric-composition-http-server.workspace = true
 fabric-package-key-value.workspace = true
-fabric-package-networking-http.workspace = true
-fabric-package-networking-tcp.workspace = true
 futures.workspace = true
 serde.workspace = true
 serde_json.workspace = true

@@ -1,7 +1,5 @@
 use serde::Serialize;
 
-use fabric_package_networking_http::{HttpHeader, HttpResponse};
-
 use crate::{Header, Result};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -9,7 +7,6 @@ pub struct Response {
     status: u16,
     headers: Vec<Header>,
     body: Vec<u8>,
-    reason: Option<String>,
 }
 
 impl Response {
@@ -28,7 +25,6 @@ impl Response {
             status: 200,
             headers: Vec::new(),
             body: body.into(),
-            reason: None,
         }
     }
 
@@ -72,30 +68,6 @@ impl Response {
     pub fn with_header(mut self, name: impl Into<String>, value: impl Into<String>) -> Self {
         self.headers.push(Header::new(name, value));
         self
-    }
-
-    pub fn from_http(response: HttpResponse) -> Self {
-        Self {
-            status: response.status_code,
-            headers: response
-                .headers
-                .into_iter()
-                .map(|header| Header::new(header.name, header.value))
-                .collect(),
-            body: response.body,
-            reason: response.reason,
-        }
-    }
-
-    pub fn into_http(self) -> HttpResponse {
-        let mut response = HttpResponse::new(self.status, self.body);
-        response.reason = self.reason;
-        response.headers = self
-            .headers
-            .into_iter()
-            .map(|header| HttpHeader::new(header.name, header.value))
-            .collect();
-        response
     }
 
     pub(crate) fn strip_body(mut self) -> Self {

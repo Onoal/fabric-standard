@@ -3,17 +3,18 @@
 Fabric Standard HTTP starts with a small application object:
 
 ```rust
-use fabric_standard_http::{serve, App, Response, ServeConfig};
+use fabric_standard_http::{App, Response};
 
-fn main() -> fabric_standard_http::Result<()> {
-    let app = App::new()
-        .get("/", |_ctx| async { Ok(Response::text("hello")) })?;
+# fn build_app() -> fabric_standard_http::Result<App> {
+let app = App::new()
+    .get("/", |_ctx| async { Ok(Response::text("hello")) })?;
 
-    serve(app, ServeConfig::local())
-}
+# Ok(app)
+# }
 ```
 
-The same prepared application can run socket-free in tests or through a real Fabric HTTP server.
+The same application can run socket-free in tests or through runtime-specific
+entrypoint crates such as `onoal-fabric-standard-http-runtime-native`.
 
 ## What It Provides
 
@@ -21,11 +22,10 @@ The same prepared application can run socket-free in tests or through a real Fab
 - path parameters and wildcard captures;
 - ordered repeated headers;
 - query access without dropping repeated values;
-- text, bytes, JSON, redirect, and raw HTTP responses;
+- text, bytes, JSON, and redirect responses;
 - onion middleware;
 - default and custom 404 handling;
 - sub-app composition;
-- local blocking `serve`;
 - one first Fabric resource proof with `KeyValue`.
 
 ## Socket-Free Execution
@@ -97,8 +97,10 @@ let app = App::new()
 
 ## Running
 
+Native serving lives in `onoal-fabric-standard-http-runtime-native`:
+
 ```bash
-cargo run -p onoal-fabric-standard-http --example hello
+cargo run -p onoal-fabric-standard-http-runtime-native --example hello
 ```
 
 The example listens on `127.0.0.1:3000` and remains running until the process is terminated.

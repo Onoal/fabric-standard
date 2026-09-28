@@ -7,12 +7,12 @@ use crate::context::RuntimeResources;
 use crate::{Error, PreparedApp, Request, Response, Result};
 
 #[derive(Clone)]
-pub(crate) struct StandardHttpKeyValueRuntimeConfig {
+pub struct StandardHttpKeyValueRuntimeConfig {
     pub(crate) app: Arc<PreparedApp>,
 }
 
 fabric::component! {
-    pub(crate) StandardHttpKeyValueRuntime {
+    pub StandardHttpKeyValueRuntime {
         id: "onoal.fabric-standard.http.runtime.key-value";
 
         config: StandardHttpKeyValueRuntimeConfig;
@@ -36,7 +36,7 @@ fabric::component! {
     }
 }
 
-pub(crate) fn key_value_runtime(
+pub fn key_value_runtime(
     occurrence: &'static str,
     app: Arc<PreparedApp>,
 ) -> Result<impl IntoFabricContribution> {
@@ -53,5 +53,3 @@ pub(crate) fn key_value_runtime(
         );
     Ok(FabricContribution::new().component(component))
 }
-
-pub(crate) use standard_http_key_value_runtime::api as key_value_runtime_api;

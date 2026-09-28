@@ -1,6 +1,7 @@
-use fabric_standard_http::{serve, App, Response, ServeConfig};
+use fabric_standard_http::{App, Response};
+use fabric_standard_http_runtime_native::{serve, ServeConfig};
 
-fn main() -> fabric_standard_http::Result<()> {
+fn main() -> fabric_standard_http_runtime_native::Result<()> {
     let app = App::new()
         .middleware(|ctx, next| async move {
             let mut response = next.run(ctx).await?;

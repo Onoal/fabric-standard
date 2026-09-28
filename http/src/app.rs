@@ -5,6 +5,7 @@ use crate::middleware::{middleware, Middleware};
 use crate::prepared::{default_not_found, PreparedApp};
 use crate::route::RoutePattern;
 use crate::router::{ensure_unique_route, Route, Router};
+use crate::runtime_support::RuntimeDefinition;
 use crate::test_runtime::TestRuntime;
 use crate::{Context, Error, Method, Response, Result};
 
@@ -176,11 +177,12 @@ impl App {
     }
 
     pub fn prepare(self) -> Result<PreparedApp> {
-        let parts = self.into_parts()?;
-        if parts.key_value.is_some() {
+        let definition = self.into_runtime_definition()?;
+        if definition.key_value_occurrence().is_some() {
             return Err(Error::RequiresFabricBoundExecution("KeyValue"));
         }
-        Ok(parts.prepared)
+        let (prepared, _, _) = definition.into_parts();
+        Ok(prepared)
     }
 
     pub async fn request(self, request: crate::Request) -> Result<Response> {
@@ -188,11 +190,11 @@ impl App {
     }
 
     pub fn test_runtime(self) -> Result<TestRuntime> {
-        TestRuntime::new(self.into_parts()?)
+        TestRuntime::new(self.into_runtime_definition()?)
     }
 
-    pub(crate) fn into_parts(self) -> Result<AppParts> {
-        Ok(AppParts {
+    pub fn into_runtime_definition(self) -> Result<RuntimeDefinition> {
+        Ok(RuntimeDefinition {
             prepared: PreparedApp::new(
                 Router::new(self.routes),
                 self.global_middleware,
@@ -218,10 +220,4 @@ impl App {
         });
         Ok(self)
     }
-}
-
-pub(crate) struct AppParts {
-    pub(crate) prepared: PreparedApp,
-    pub(crate) fabric: Vec<FabricContribution>,
-    pub(crate) key_value: Option<&'static str>,
 }

@@ -302,11 +302,21 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "onoal-fabric",
- "onoal-fabric-composition-http-server",
  "onoal-fabric-package-key-value",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "onoal-fabric-standard-http-runtime-native"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "onoal-fabric",
+ "onoal-fabric-composition-http-server",
  "onoal-fabric-package-networking-http",
  "onoal-fabric-package-networking-tcp",
- "serde",
+ "onoal-fabric-standard-http",
  "serde_json",
 ]
 

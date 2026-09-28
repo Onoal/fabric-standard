@@ -4,7 +4,6 @@ use std::fmt;
 use fabric::component::ComponentError;
 use fabric::prelude::{CompositionError, FabricBuildError, InstanceError, RuntimeCleanupError};
 use fabric_package_key_value::KeyValueError;
-use fabric_package_networking_http::HttpError;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -20,7 +19,6 @@ pub enum Error {
     Instance(Box<InstanceError>),
     RuntimeCleanup(Box<RuntimeCleanupError>),
     Component(Box<ComponentError>),
-    Http(Box<HttpError>),
     KeyValue(Box<KeyValueError>),
     ResourceUnavailable(&'static str),
     RequiresFabricBoundExecution(&'static str),
@@ -57,12 +55,11 @@ impl fmt::Display for Error {
             Self::Instance(error) => write!(f, "Fabric instance error: {error}"),
             Self::RuntimeCleanup(error) => write!(f, "Fabric runtime cleanup error: {error}"),
             Self::Component(error) => write!(f, "Fabric component error: {error}"),
-            Self::Http(error) => write!(f, "HTTP package error: {error}"),
             Self::KeyValue(error) => write!(f, "KeyValue error: {error}"),
             Self::ResourceUnavailable(name) => write!(f, "resource unavailable: {name}"),
             Self::RequiresFabricBoundExecution(name) => write!(
                 f,
-                "{name}-backed HTTP apps require Fabric-bound execution; use App::test_runtime() for socket-free tests or serve() for live HTTP transport"
+                "{name}-backed HTTP apps require Fabric-bound execution; use App::test_runtime() for socket-free tests or a runtime-specific serve() for live HTTP transport"
             ),
         }
     }
@@ -78,7 +75,6 @@ impl StdError for Error {
             Self::Instance(error) => Some(error.as_ref()),
             Self::RuntimeCleanup(error) => Some(error.as_ref()),
             Self::Component(error) => Some(error.as_ref()),
-            Self::Http(error) => Some(error.as_ref()),
             Self::KeyValue(error) => Some(error.as_ref()),
             Self::Authoring(_)
             | Self::Dispatch(_)
@@ -122,12 +118,6 @@ impl From<RuntimeCleanupError> for Error {
 impl From<ComponentError> for Error {
     fn from(value: ComponentError) -> Self {
         Self::Component(Box::new(value))
-    }
-}
-
-impl From<HttpError> for Error {
-    fn from(value: HttpError) -> Self {
-        Self::Http(Box::new(value))
     }
 }
 

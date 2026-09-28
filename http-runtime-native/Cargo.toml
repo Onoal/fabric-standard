@@ -1,0 +1,21 @@
+[package]
+name = "onoal-fabric-standard-http-runtime-native"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Native Fabric runtime for Fabric Standard HTTP applications"
+readme = "README.md"
+
+[lib]
+name = "fabric_standard_http_runtime_native"
+path = "src/lib.rs"
+
+[dependencies]
+fabric.workspace = true
+fabric-composition-http-server.workspace = true
+fabric-package-networking-http.workspace = true
+fabric-package-networking-tcp.workspace = true
+fabric-standard-http = { package = "onoal-fabric-standard-http", path = "../http", version = "0.1.0" }
+futures.workspace = true
+serde_json.workspace = true

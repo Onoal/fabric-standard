@@ -1,7 +1,6 @@
 use std::sync::{Arc, Mutex};
 
 use fabric_package_key_value::memory_key_value;
-use fabric_package_networking_http::{HttpHeader, HttpRequest, HttpVersion};
 use fabric_standard_http::{App, Error, Method, Request, Response, TestRuntime};
 use futures::executor::block_on;
 
@@ -249,19 +248,10 @@ fn query_access_preserves_repeated_values() {
 }
 
 #[test]
-fn request_raw_and_repeated_headers_are_preserved() {
-    let raw = HttpRequest {
-        method: "GET".to_owned(),
-        target: "/headers".to_owned(),
-        version: HttpVersion::Http11,
-        headers: vec![
-            HttpHeader::new("x-test", "a"),
-            HttpHeader::new("x-test", "b"),
-        ],
-        body: Vec::new(),
-    };
-    let request = Request::from_http(raw).expect("request");
-    assert_eq!(request.raw().target, "/headers");
+fn request_repeated_headers_are_preserved() {
+    let request = Request::get("/headers")
+        .with_header("x-test", "a")
+        .with_header("x-test", "b");
     assert_eq!(request.header("x-test"), Some("a"));
     assert_eq!(request.headers_all("x-test"), vec!["a", "b"]);
 }

@@ -1,7 +1,3 @@
-use fabric_package_networking_http::{HttpHeader, HttpRequest, HttpVersion};
-
-use crate::{Error, Result};
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Method {
     Get,
@@ -67,7 +63,6 @@ pub struct Request {
     query: Option<String>,
     headers: Vec<Header>,
     body: Vec<u8>,
-    raw: HttpRequest,
 }
 
 impl Request {
@@ -82,55 +77,18 @@ impl Request {
     pub fn new(method: Method, target: impl Into<String>, body: impl Into<Vec<u8>>) -> Self {
         let target = target.into();
         let (path, query) = split_target(&target);
-        let body = body.into();
-        let raw = HttpRequest {
-            method: method.as_str().to_owned(),
-            target: target.clone(),
-            version: HttpVersion::Http11,
-            headers: Vec::new(),
-            body: body.clone(),
-        };
         Self {
             method,
             target,
             path,
             query,
             headers: Vec::new(),
-            body,
-            raw,
+            body: body.into(),
         }
-    }
-
-    pub fn from_http(raw: HttpRequest) -> Result<Self> {
-        let method = Method::from(raw.method.as_str());
-        let (path, query) = split_target(&raw.target);
-        if !path.starts_with('/') {
-            return Err(Error::dispatch(format!(
-                "HTTP request target `{}` does not contain an absolute path",
-                raw.target
-            )));
-        }
-        let headers = raw
-            .headers
-            .iter()
-            .map(|header| Header::new(header.name.clone(), header.value.clone()))
-            .collect();
-        Ok(Self {
-            method,
-            target: raw.target.clone(),
-            path,
-            query,
-            headers,
-            body: raw.body.clone(),
-            raw,
-        })
     }
 
     pub fn with_header(mut self, name: impl Into<String>, value: impl Into<String>) -> Self {
         let header = Header::new(name, value);
-        self.raw
-            .headers
-            .push(HttpHeader::new(header.name.clone(), header.value.clone()));
         self.headers.push(header);
         self
     }
@@ -188,16 +146,6 @@ impl Request {
 
     pub fn body(&self) -> &[u8] {
         &self.body
-    }
-
-    pub fn raw(&self) -> &HttpRequest {
-        &self.raw
-    }
-}
-
-impl From<Header> for HttpHeader {
-    fn from(value: Header) -> Self {
-        Self::new(value.name, value.value)
     }
 }
 
