@@ -46,3 +46,7 @@ serve
 `TestRuntime` is not a universal production runtime ontology. It exists so
 resource-backed Standard HTTP applications can be tested through real Fabric
 materialization and relation binding without TCP.
+
+Standard HTTP application semantics are runtime-independent. Native Fabric TCP
+serving is one runtime realization, not the identity of the HTTP application:
+`App` and `PreparedApp` are not native TCP servers.

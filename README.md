@@ -16,3 +16,15 @@ cargo check --workspace --all-targets --locked
 cargo test --workspace --all-targets --locked
 cargo clippy --workspace --all-targets --locked -- -D warnings
 ```
+
+## Dependency Sources
+
+Normal clone/build uses committed registry and Git dependency sources. Local
+cross-repository development overrides are developer-local and must not be
+committed. If a developer needs to test unpublished lower-layer changes, use a
+local Cargo override outside the repository with placeholder paths such as:
+
+```toml
+[patch.crates-io]
+onoal-fabric = { path = "<local-fabric-checkout>/sdk" }
+```
