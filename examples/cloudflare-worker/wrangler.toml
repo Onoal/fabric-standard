@@ -1,0 +1,11 @@
+name = "fabric-standard-cloudflare-worker"
+main = "build/worker/shim.mjs"
+compatibility_date = "2026-09-28"
+
+[build]
+command = "cargo install -q worker-build --version 0.8.7 --locked && worker-build --release"
+
+[[rules]]
+type = "CompiledWasm"
+globs = ["**/*.wasm"]
+fallthrough = false

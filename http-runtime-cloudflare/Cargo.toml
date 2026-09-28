@@ -1,0 +1,19 @@
+[package]
+name = "onoal-fabric-standard-http-runtime-cloudflare"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Cloudflare Workers runtime for Fabric Standard HTTP applications"
+readme = "README.md"
+
+[lib]
+name = "fabric_standard_http_runtime_cloudflare"
+path = "src/lib.rs"
+
+[dependencies]
+fabric-standard-http = { package = "onoal-fabric-standard-http", path = "../http", version = "0.1.0" }
+worker.workspace = true
+
+[dev-dependencies]
+fabric-package-key-value.workspace = true

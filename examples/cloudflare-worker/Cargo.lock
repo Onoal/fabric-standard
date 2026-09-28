@@ -104,6 +104,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
+name = "fabric-standard-cloudflare-worker"
+version = "0.1.0"
+dependencies = [
+ "onoal-fabric-standard-http",
+ "onoal-fabric-standard-http-runtime-cloudflare",
+ "serde_json",
+ "worker",
+]
+
+[[package]]
 name = "form_urlencoded"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -241,12 +251,6 @@ dependencies = [
  "bytes",
  "http",
 ]
-
-[[package]]
-name = "httparse"
-version = "1.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
 
 [[package]]
 name = "icu_collections"
@@ -445,16 +449,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "onoal-fabric-composition-http-server"
-version = "0.1.0"
-source = "git+https://github.com/Onoal/fabric-ecosystem.git?rev=14c4e9aafd3c6bde526e80cc188afbd709c7e402#14c4e9aafd3c6bde526e80cc188afbd709c7e402"
-dependencies = [
- "onoal-fabric",
- "onoal-fabric-package-networking-http",
- "onoal-fabric-package-networking-tcp",
-]
-
-[[package]]
 name = "onoal-fabric-core"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -476,24 +470,6 @@ dependencies = [
 
 [[package]]
 name = "onoal-fabric-package-key-value"
-version = "0.1.0"
-source = "git+https://github.com/Onoal/fabric-ecosystem.git?rev=14c4e9aafd3c6bde526e80cc188afbd709c7e402#14c4e9aafd3c6bde526e80cc188afbd709c7e402"
-dependencies = [
- "onoal-fabric",
-]
-
-[[package]]
-name = "onoal-fabric-package-networking-http"
-version = "0.1.0"
-source = "git+https://github.com/Onoal/fabric-ecosystem.git?rev=14c4e9aafd3c6bde526e80cc188afbd709c7e402#14c4e9aafd3c6bde526e80cc188afbd709c7e402"
-dependencies = [
- "httparse",
- "onoal-fabric",
- "onoal-fabric-package-networking-tcp",
-]
-
-[[package]]
-name = "onoal-fabric-package-networking-tcp"
 version = "0.1.0"
 source = "git+https://github.com/Onoal/fabric-ecosystem.git?rev=14c4e9aafd3c6bde526e80cc188afbd709c7e402#14c4e9aafd3c6bde526e80cc188afbd709c7e402"
 dependencies = [
@@ -539,22 +515,8 @@ dependencies = [
 name = "onoal-fabric-standard-http-runtime-cloudflare"
 version = "0.1.0"
 dependencies = [
- "onoal-fabric-package-key-value",
  "onoal-fabric-standard-http",
  "worker",
-]
-
-[[package]]
-name = "onoal-fabric-standard-http-runtime-native"
-version = "0.1.0"
-dependencies = [
- "futures",
- "onoal-fabric",
- "onoal-fabric-composition-http-server",
- "onoal-fabric-package-networking-http",
- "onoal-fabric-package-networking-tcp",
- "onoal-fabric-standard-http",
- "serde_json",
 ]
 
 [[package]]

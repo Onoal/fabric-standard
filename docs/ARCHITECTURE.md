@@ -26,10 +26,19 @@ Standard HTTP owns a small HTTP application framework:
 
 It does not own backend modules, storage, authentication, OpenAPI, RPC, streaming, or a middleware catalog.
 
-Standard HTTP Core is runtime-independent application semantics. The Native
-Fabric runtime is a separate crate that realizes a Standard HTTP application as
-a long-running Fabric HTTP/TCP server. Cloudflare Workers is the only current
-external runtime target under active investigation; it is not implemented yet.
+Standard HTTP Core is runtime-independent application semantics. The active
+runtime realizations are:
+
+```text
+Standard HTTP Core
+    App / PreparedApp / Request / Response / Context / middleware
+
+Native Fabric runtime
+    long-running Fabric HTTP/TCP server
+
+Cloudflare Workers runtime
+    Workers fetch invocation projected into PreparedApp
+```
 
 The current execution boundaries are intentionally distinct:
 
@@ -53,6 +62,6 @@ materialization and relation binding without TCP.
 
 Standard HTTP application semantics are runtime-independent. Native Fabric TCP
 serving is one runtime realization, not the identity of the HTTP application.
-The future Cloudflare Workers runtime will also be a runtime realization, not
-HTTP identity. `App` and `PreparedApp` are not native TCP servers, Cloudflare
+Cloudflare Workers fetch invocation is another runtime realization, not HTTP
+identity. `App` and `PreparedApp` are not native TCP servers, Cloudflare
 Workers, or any other runtime target.

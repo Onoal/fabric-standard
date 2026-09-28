@@ -1,0 +1,18 @@
+[package]
+name = "fabric-standard-cloudflare-worker"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+fabric-standard-http = { package = "onoal-fabric-standard-http", path = "../../http" }
+fabric-standard-http-runtime-cloudflare = { package = "onoal-fabric-standard-http-runtime-cloudflare", path = "../../http-runtime-cloudflare" }
+serde_json = "1"
+worker = "0.8.7"
+
+[profile.release]
+lto = true
+codegen-units = 1
