@@ -5,11 +5,13 @@ Fabric Standard is Onoal's opinionated developer layer above Fabric.
 Fabric Core provides the universal construction grammar. Fabric Ecosystem provides reusable capabilities, realizations, and compositions. Fabric Standard provides domain developer worlds that make common application shapes pleasant without hiding their Fabric foundation.
 
 The first implemented Standard domain is HTTP. It currently has a portable HTTP
-application crate and a Native Fabric runtime crate:
+application crate plus Native Fabric and Cloudflare Workers runtime crates:
 
 - `onoal-fabric-standard-http` owns application semantics.
 - `onoal-fabric-standard-http-runtime-native` runs those applications through
   the Native Fabric HTTP/TCP runtime.
+- `onoal-fabric-standard-http-runtime-cloudflare` adapts Cloudflare Workers
+  fetch invocations to the same HTTP application semantics.
 
 ## Verification
 

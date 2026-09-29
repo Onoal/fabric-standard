@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use fabric_package_key_value::memory_key_value;
 use fabric_standard_http::{App, Error, Method, Request, Response, TestRuntime};
-use futures::executor::block_on;
+use futures::{executor::block_on, future};
 
 fn text(response: &Response) -> String {
     String::from_utf8(response.body().to_vec()).expect("utf8 response")
@@ -103,20 +103,26 @@ fn key_value_test_runtime_uses_real_fabric_and_preserves_state() {
         .expect("middleware")
         .post("/sessions/:id", |ctx| async move {
             let key = ctx.param("id")?.to_owned();
-            ctx.key_value()?.set(key, b"active".to_vec())?;
+            ctx.key_value()?.set(key, b"active".to_vec()).await?;
             Ok(Response::text("stored"))
         })
         .expect("post")
         .get("/sessions/:id", |ctx| async move {
             let key = ctx.param("id")?.to_owned();
-            let value = ctx.key_value()?.get(key)?;
+            let value = ctx.key_value()?.get(key).await?;
             Ok(Response::text(
                 value
                     .map(|value| String::from_utf8_lossy(&value).into_owned())
                     .unwrap_or_else(|| "missing".to_owned()),
             ))
         })
-        .expect("get");
+        .expect("get")
+        .delete("/sessions/:id", |ctx| async move {
+            let key = ctx.param("id")?.to_owned();
+            ctx.key_value()?.delete(key).await?;
+            Ok(Response::text("deleted"))
+        })
+        .expect("delete");
 
     let runtime = app.test_runtime().expect("runtime");
 
@@ -135,7 +141,32 @@ fn key_value_test_runtime_uses_real_fabric_and_preserves_state() {
     let loaded = block_on(runtime.request(Request::get("/sessions/abc"))).expect("loaded");
     assert_eq!(text(&loaded), "active");
 
+    let deleted =
+        block_on(runtime.request(Request::new(Method::Delete, "/sessions/abc", Vec::new())))
+            .expect("deleted");
+    assert_eq!(text(&deleted), "deleted");
+
+    let missing = block_on(runtime.request(Request::get("/sessions/abc"))).expect("missing");
+    assert_eq!(text(&missing), "missing");
+
     runtime.stop().expect("stop");
+}
+
+#[test]
+fn handler_invocation_future_may_be_non_send() {
+    let response = block_on(
+        App::new()
+            .get("/", |_ctx| async move {
+                let value = std::rc::Rc::new(String::from("event-loop-local"));
+                future::ready(()).await;
+                Ok(Response::text(value.as_str()))
+            })
+            .expect("route")
+            .request(Request::get("/")),
+    )
+    .expect("response");
+
+    assert_eq!(text(&response), "event-loop-local");
 }
 
 #[test]

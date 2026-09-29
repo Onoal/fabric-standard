@@ -37,7 +37,7 @@ impl App {
     pub fn get<F, Fut>(self, path: &str, handler: F) -> Result<Self>
     where
         F: Fn(Context) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         self.route_method(Method::Get, path, handler)
     }
@@ -45,7 +45,7 @@ impl App {
     pub fn post<F, Fut>(self, path: &str, handler: F) -> Result<Self>
     where
         F: Fn(Context) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         self.route_method(Method::Post, path, handler)
     }
@@ -53,7 +53,7 @@ impl App {
     pub fn put<F, Fut>(self, path: &str, handler: F) -> Result<Self>
     where
         F: Fn(Context) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         self.route_method(Method::Put, path, handler)
     }
@@ -61,7 +61,7 @@ impl App {
     pub fn patch<F, Fut>(self, path: &str, handler: F) -> Result<Self>
     where
         F: Fn(Context) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         self.route_method(Method::Patch, path, handler)
     }
@@ -69,7 +69,7 @@ impl App {
     pub fn delete<F, Fut>(self, path: &str, handler: F) -> Result<Self>
     where
         F: Fn(Context) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         self.route_method(Method::Delete, path, handler)
     }
@@ -77,7 +77,7 @@ impl App {
     pub fn options<F, Fut>(self, path: &str, handler: F) -> Result<Self>
     where
         F: Fn(Context) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         self.route_method(Method::Options, path, handler)
     }
@@ -85,7 +85,7 @@ impl App {
     pub fn head<F, Fut>(self, path: &str, handler: F) -> Result<Self>
     where
         F: Fn(Context) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         self.route_method(Method::Head, path, handler)
     }
@@ -93,7 +93,7 @@ impl App {
     pub fn middleware<F, Fut>(mut self, middleware_fn: F) -> Result<Self>
     where
         F: Fn(Context, crate::Next) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         self.global_middleware.push(middleware(middleware_fn));
         Ok(self)
@@ -107,7 +107,7 @@ impl App {
     ) -> Result<Self>
     where
         F: Fn(Context, crate::Next) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         let pattern = RoutePattern::parse(path)?;
         let route = self
@@ -128,7 +128,7 @@ impl App {
     pub fn not_found<F, Fut>(mut self, handler_fn: F) -> Self
     where
         F: Fn(Context) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         self.not_found = handler(handler_fn);
         self
@@ -208,7 +208,7 @@ impl App {
     fn route_method<F, Fut>(mut self, method: Method, path: &str, handler_fn: F) -> Result<Self>
     where
         F: Fn(Context) -> Fut + Send + Sync + 'static,
-        Fut: std::future::Future<Output = Result<Response>> + Send + 'static,
+        Fut: std::future::Future<Output = Result<Response>> + 'static,
     {
         let pattern = RoutePattern::parse(path)?;
         ensure_unique_route(&self.routes, &method, &pattern)?;

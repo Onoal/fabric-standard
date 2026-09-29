@@ -10,11 +10,11 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/Onoal/fabric-standard"
 
 [workspace.dependencies]
-fabric = { package = "onoal-fabric", version = "1.0.0" }
-fabric-composition-http-server = { package = "onoal-fabric-composition-http-server", version = "0.1.0", git = "https://github.com/Onoal/fabric-ecosystem.git", rev = "14c4e9aafd3c6bde526e80cc188afbd709c7e402" }
-fabric-package-key-value = { package = "onoal-fabric-package-key-value", version = "0.1.0", git = "https://github.com/Onoal/fabric-ecosystem.git", rev = "14c4e9aafd3c6bde526e80cc188afbd709c7e402" }
-fabric-package-networking-http = { package = "onoal-fabric-package-networking-http", version = "0.1.0", git = "https://github.com/Onoal/fabric-ecosystem.git", rev = "14c4e9aafd3c6bde526e80cc188afbd709c7e402" }
-fabric-package-networking-tcp = { package = "onoal-fabric-package-networking-tcp", version = "0.1.0", git = "https://github.com/Onoal/fabric-ecosystem.git", rev = "14c4e9aafd3c6bde526e80cc188afbd709c7e402" }
+fabric = { package = "onoal-fabric", version = "1.1.0", git = "https://github.com/Onoal/fabric.git", rev = "be91d64d8db605dba6f1555cf1fcfde3888aa936" }
+fabric-composition-http-server = { package = "onoal-fabric-composition-http-server", version = "0.1.0", git = "https://github.com/Onoal/fabric-ecosystem.git", rev = "0c7ea2cbf787ff89ccbbc5e97a73906184379426" }
+fabric-package-key-value = { package = "onoal-fabric-package-key-value", version = "0.1.0", git = "https://github.com/Onoal/fabric-ecosystem.git", rev = "0c7ea2cbf787ff89ccbbc5e97a73906184379426" }
+fabric-package-networking-http = { package = "onoal-fabric-package-networking-http", version = "0.1.0", git = "https://github.com/Onoal/fabric-ecosystem.git", rev = "0c7ea2cbf787ff89ccbbc5e97a73906184379426" }
+fabric-package-networking-tcp = { package = "onoal-fabric-package-networking-tcp", version = "0.1.0", git = "https://github.com/Onoal/fabric-ecosystem.git", rev = "0c7ea2cbf787ff89ccbbc5e97a73906184379426" }
 futures = "0.3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

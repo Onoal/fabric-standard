@@ -59,7 +59,7 @@ let app = App::new()
     .use_key_value("sessions")?
     .post("/sessions/:id", |ctx| async move {
         let id = ctx.param("id")?.to_owned();
-        ctx.key_value()?.set(id, b"active".to_vec())?;
+        ctx.key_value()?.set(id, b"active".to_vec()).await?;
         Ok(Response::text("stored"))
     })?;
 
@@ -88,12 +88,32 @@ let app = App::new()
     .use_key_value("sessions")?
     .post("/sessions/:id", |ctx| async move {
         let key = ctx.param("id")?.to_owned();
-        ctx.key_value()?.set(key, b"active".to_vec())?;
+        ctx.key_value()?.set(key, b"active".to_vec()).await?;
         Ok(Response::text("stored"))
     })?;
 ```
 
 `"sessions"` is the Fabric Resource occurrence name. Request-time access uses `ctx.key_value()`; it is not a string lookup registry.
+
+Resource capability operations are awaited in handlers:
+
+```rust
+let store = ctx.key_value()?;
+store.set("session".to_owned(), b"active".to_vec()).await?;
+let value = store.get("session".to_owned()).await?;
+store.delete("session".to_owned()).await?;
+# Ok::<(), fabric_standard_http::Error>(())
+```
+
+`KeyValueHandle::delete` reports completion only. It does not return the
+previous value, an existence boolean, or a delete count.
+
+## Execution Futures
+
+Stored handlers and middleware remain `Send + Sync` application definitions.
+The Future produced by one handler or middleware invocation is not globally
+required to be `Send`, so a runtime can execute a request on an event-loop-local
+context while preserving the same `PreparedApp` dispatcher.
 
 ## Running
 

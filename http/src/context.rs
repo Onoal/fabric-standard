@@ -31,16 +31,16 @@ pub struct KeyValueHandle {
 }
 
 impl KeyValueHandle {
-    pub fn get(&self, key: String) -> std::result::Result<Option<Vec<u8>>, KeyValueError> {
-        self.inner.get(key)
+    pub async fn get(&self, key: String) -> std::result::Result<Option<Vec<u8>>, KeyValueError> {
+        self.inner.get(key).await
     }
 
-    pub fn set(&self, key: String, value: Vec<u8>) -> std::result::Result<(), KeyValueError> {
-        self.inner.set(key, value)
+    pub async fn set(&self, key: String, value: Vec<u8>) -> std::result::Result<(), KeyValueError> {
+        self.inner.set(key, value).await
     }
 
-    pub fn delete(&self, key: String) -> std::result::Result<Option<Vec<u8>>, KeyValueError> {
-        self.inner.delete(key)
+    pub async fn delete(&self, key: String) -> std::result::Result<(), KeyValueError> {
+        self.inner.delete(key).await
     }
 }
 

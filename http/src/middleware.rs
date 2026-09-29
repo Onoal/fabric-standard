@@ -11,7 +11,7 @@ pub(crate) type Middleware =
 pub(crate) fn middleware<F, Fut>(middleware: F) -> Middleware
 where
     F: Fn(Context, Next) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = Result<Response>> + Send + 'static,
+    Fut: Future<Output = Result<Response>> + 'static,
 {
     Arc::new(move |ctx, next| Box::pin(middleware(ctx, next)))
 }
